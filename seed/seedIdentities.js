@@ -1,43 +1,51 @@
 require("dotenv").config();
 const nibss = require("../src/services/nibss.service");
 
-const testIdentities = [
+const testBvns = [
   {
-    bvn: "12345678901",
-    firstName: "Amara",
-    lastName: "Efejiro",
-    dob: "1995-06-15",
-    phone: "08012345678",
+    bvn: "90213478564",
+    firstName: "Matthew",
+    lastName: "Fadeyi",
+    email: "matthew.fadeyi@meilleurbank.com",
+    kycType: "bvn",
+    dob: "1988-03-17",
+    phone: "07062123343",
   },
   {
-    bvn: "98765432101",
-    firstName: "Tolu",
-    lastName: "Nwachukwu",
-    dob: "1990-03-22",
-    phone: "07098765432",
+    bvn: "62918230948",
+    firstName: "Omalicha",
+    lastName: "Obolanosor",
+    email: "omalicha@meilleurbank.com",
+    kycType: "bvn",
+    dob: "1993-11-29",
+    phone: "09192345678",
   },
 ];
 
 const testNins = [
   {
-    nin: "12433445572",
-    firstName: "Kamchi",
-    lastName: "Bello",
-    dob: "1978-10-05",
-    phone: "07098765433",
+    nin: "58203746819",
+    firstName: "Adaeze",
+    lastName: "Nwanneka",
+    email: "adaeze@meilleurbank.com",
+    kycType: "nin",
+    dob: "1996-07-04",
+    phone: "08058203746",
   },
   {
-    nin: "11223344556",
-    firstName: "Fatima",
-    lastName: "Ilia",
-    dob: "1998-11-05",
+    nin: "67433445572",
+    firstName: "Kamchi",
+    lastName: "Bello",
+    email: "kamchi@meilleurbank.com",
+    kycType: "nin",
+    dob: "1978-10-05",
     phone: "07098765433",
   },
 ];
 
 (async () => {
   console.log("Seeding BVN records...");
-  for (const identity of testIdentities) {
+  for (const identity of testBvns) {
     try {
       const res = await nibss.insertBvn(identity);
       console.log("BVN seeded:", res);

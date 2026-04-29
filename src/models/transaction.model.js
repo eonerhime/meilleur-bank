@@ -7,7 +7,7 @@ const transactionSchema = new mongoose.Schema(
       ref: "Customer",
       required: true,
     },
-    transactionId: { type: String }, // returned by NIBSS
+    transactionRef: { type: String }, // returned by NIBSS
     type: {
       type: String,
       enum: ["intra", "inter", "credit"],

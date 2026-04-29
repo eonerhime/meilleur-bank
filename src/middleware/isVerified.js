@@ -1,4 +1,4 @@
-const Customer = require("../models/Customer");
+const Customer = require("../models/customer.model");
 
 module.exports = async (req, res, next) => {
   const customer = await Customer.findById(req.user.id);

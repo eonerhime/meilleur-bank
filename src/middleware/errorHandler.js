@@ -1,5 +1,6 @@
 module.exports = (err, req, res, next) => {
   console.error(err.stack);
+  console.error("❌ Full error:", err);
 
   // Axios/NIBSS errors
   if (err.response) {

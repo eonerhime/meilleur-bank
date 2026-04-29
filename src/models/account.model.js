@@ -1,3 +1,4 @@
+require("dotenv").config();
 const mongoose = require("mongoose");
 
 const accountSchema = new mongoose.Schema(
@@ -16,6 +17,7 @@ const accountSchema = new mongoose.Schema(
     bankName: {
       type: String,
       required: true,
+      default: process.env.BANK_NAME,
     },
     balance: {
       type: Number,

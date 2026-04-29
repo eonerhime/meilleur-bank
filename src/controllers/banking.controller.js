@@ -1,5 +1,5 @@
-const Account = require("../models/Account");
-const Transaction = require("../models/Transaction");
+const Account = require("../models/account.model");
+const Transaction = require("../models/transaction.model");
 const nibss = require("../services/nibss.service");
 
 // Name Enquiry
@@ -74,7 +74,7 @@ exports.transfer = async (req, res, next) => {
     // Record transaction
     const txn = await Transaction.create({
       customerId: req.user.id,
-      transactionId: nibssResult.transactionId,
+      transactionRef: nibssResult.ref,
       type,
       fromAccount,
       toAccount,
@@ -85,9 +85,19 @@ exports.transfer = async (req, res, next) => {
 
     res.status(201).json({
       message: "Transfer successful",
-      transactionId: txn.transactionId,
+      transactionRef: txn.transactionRef,
       status: txn.status,
     });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// Get All Accounts (for admin)
+exports.getAllAccounts = async (req, res, next) => {
+  try {
+    const result = await nibss.getAllAccounts();
+    res.json(result);
   } catch (err) {
     next(err);
   }
@@ -96,11 +106,11 @@ exports.transfer = async (req, res, next) => {
 // Transaction Status Check
 exports.getTransactionStatus = async (req, res, next) => {
   try {
-    const { transactionId } = req.params;
+    const { transactionRef } = req.params;
 
     // Check locally first
     const local = await Transaction.findOne({
-      transactionId,
+      transactionRef,
       customerId: req.user.id, // data isolation
     });
 
@@ -110,13 +120,13 @@ exports.getTransactionStatus = async (req, res, next) => {
 
     // If pending, refresh from NIBSS
     if (local.status === "pending") {
-      const nibssStatus = await nibss.getTransaction(transactionId);
+      const nibssStatus = await nibss.getTransaction(transactionRef);
       local.status = nibssStatus.status.toLowerCase();
       await local.save();
     }
 
     res.json({
-      transactionId: local.transactionId,
+      transactionRef: local.transactionRef,
       status: local.status,
       amount: local.amount,
       from: local.fromAccount,

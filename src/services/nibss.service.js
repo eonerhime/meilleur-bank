@@ -41,15 +41,18 @@ const validateNin = (nin) => nibssRequest("post", "/api/validateNin", { nin });
 // ── Accounts ──────────────────────────────────────────
 const createAccount = (payload) =>
   nibssRequest("post", "/api/account/create", payload);
-const nameEnquiry = (accountNo) =>
-  nibssRequest("get", `/api/account/name-enquiry/${accountNo}`);
-const getBalance = (accountNo) =>
-  nibssRequest("get", `/api/account/balance/${accountNo}`);
+
+const nameEnquiry = (accountNumber) =>
+  nibssRequest("get", `/api/account/name-enquiry/${accountNumber}`);
+
+const getBalance = (accountNumber) =>
+  nibssRequest("get", `/api/account/balance/${accountNumber}`);
+
+const getAllAccounts = () => nibssRequest("get", "/api/accounts");
 
 // ── Transfers ──────────────────────────────────────────
 const transfer = (payload) => nibssRequest("post", "/api/transfer", payload);
-const getTransaction = (txId) =>
-  nibssRequest("get", `/api/transaction/${txId}`);
+const getTransaction = (ref) => nibssRequest("get", `/api/transaction/${ref}`);
 
 module.exports = {
   insertBvn,
@@ -61,4 +64,5 @@ module.exports = {
   getBalance,
   transfer,
   getTransaction,
+  getAllAccounts,
 };
