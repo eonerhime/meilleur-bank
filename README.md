@@ -51,7 +51,7 @@ The system enforces core banking rules: a customer must pass KYC verification be
 Client (ThunderClient / Frontend)
          │
          ▼
-  Meilleur Bank API  (Express — port 3000)
+  Meilleur Bank API  (Express — port 3044)
          │                    │
          ▼                    ▼
      MongoDB            NibssByPhoenix API
@@ -205,7 +205,7 @@ cp .env.example .env.local
 Open `.env.local` and fill in your values:
 
 ```env
-PORT=3000
+PORT=3044
 NODE_ENV=development
 
 # Local MongoDB
@@ -235,7 +235,7 @@ node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"
 **For production** (MongoDB Atlas), fill in `.env` instead:
 
 ```env
-PORT=3000
+PORT=3044
 NODE_ENV=production
 
 MONGODB_URI_ATLAS=mongodb+srv://username:password@cluster.mongodb.net/meilleur-bank
@@ -284,11 +284,11 @@ npm start
 **Expected output:**
 
 ```
-🏦 Meilleur Bank running on port 3000
+🏦 Meilleur Bank running on port 3044
 ✅ MongoDB connected
 ```
 
-The server is now running at `http://localhost:3000`.
+The server is now running at `http://localhost:3044`.
 
 ---
 
@@ -368,7 +368,7 @@ Open `implementation-guide.md` alongside your editor as you build. It is organis
 
 ## API Reference
 
-All endpoints are relative to `http://localhost:3000` in development.
+All endpoints are relative to `http://localhost:3044` in development.
 
 For protected routes, include the JWT token from login in every request header:
 
@@ -550,9 +550,9 @@ Requires JWT. Returns both your local balance and the live balance from NibssByP
 
 ```json
 {
-  "accountNumber": "0123456789",
-  "localBalance": 13000,
-  "nibssBalance": 13000
+  "from": "0123456789",
+  "to": "0987654321",
+  "amount": 13000
 }
 ```
 
