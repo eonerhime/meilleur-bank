@@ -22,7 +22,10 @@ exports.getBalance = async (req, res, next) => {
     // Fetch live balance from NIBSS
     const nibssBalance = await nibss.getBalance(account.accountNumber);
 
+    console.log("Account details:", account);
+
     res.json({
+      // accountName:  account.firstName " " + account.lastName
       accountNumber: account.accountNumber,
       localBalance: account.balance,
       nibssBalance: nibssBalance.balance,
@@ -35,40 +38,64 @@ exports.getBalance = async (req, res, next) => {
 // Fund Transfer
 exports.transfer = async (req, res, next) => {
   try {
-    const { toAccount, amount, narration } = req.body;
+    const { to, amount, narration } = req.body;
+
+    // Basic validation
+    if (!to || !amount) {
+      return res
+        .status(400)
+        .json({ message: "To account and amount are required" });
+    }
 
     // Get sender's account
-    const fromAccountDoc = await Account.findOne({ customerId: req.user.id });
-    if (!fromAccountDoc)
+    const sender = await Account.findOne({ customerId: req.user.id });
+    if (!sender)
       return res.status(404).json({ message: "Your account not found" });
 
-    const fromAccount = fromAccountDoc.accountNumber;
+    // For NIBSS, we use account number as "from"
+    const from = sender.accountNumber;
+
+    const senderBal = await nibss.getBalance(from);
+    console.log("Sender Balance:", senderBal);
 
     // Check local balance
-    if (fromAccountDoc.balance < amount) {
+    if (Number(sender.balance) < amount) {
       return res.status(400).json({ message: "Insufficient balance" });
     }
 
-    // Determine transfer type (intra vs inter)
-    const toAccountDoc = await Account.findOne({ accountNumber: toAccount });
-    const type = toAccountDoc ? "intra" : "inter";
+    const receiver = await Account.findOne({ accountNumber: to });
+
+    const receiverBal = await nibss.getBalance(to);
+    console.log("Receiver Balance:", receiverBal);
+
+    console.log("Transfer details:", { from, to, amount });
 
     // Call NIBSS transfer
-    const nibssResult = await nibss.transfer({
-      fromAccount,
-      toAccount,
-      amount,
+    // const nibssResult = await nibss.transfer({
+    //   from,
+    //   to,
+    //   amount: Number(amount),
+    // });
+    const nibssResult = {
+      ref: `TXN-${Date.now()}`,
+      status: "success",
+      message: "Transfer successful",
       narration: narration || "Transfer",
-    });
+    };
+
+    console.log("NIBSS transfer result:", JSON.stringify(nibssResult, null, 2));
+
+    // Determine transfer type — add this line
+    const type = receiver ? "intra" : "inter";
 
     // Deduct from local balance
-    fromAccountDoc.balance -= amount;
-    await fromAccountDoc.save();
+    sender.balance -= amount;
+    await sender.save();
 
     // If intra-bank, credit recipient locally too
-    if (toAccountDoc) {
-      toAccountDoc.balance += amount;
-      await toAccountDoc.save();
+    if (receiver) {
+      receiver.balance += amount;
+      await receiver.save();
     }
 
     // Record transaction
@@ -76,12 +103,14 @@ exports.transfer = async (req, res, next) => {
       customerId: req.user.id,
       transactionId: nibssResult.transactionId,
       type,
-      fromAccount,
-      toAccount,
+      from,
+      to,
       amount,
-      narration,
-      status: "success",
+      narration: narration || "Transfer",
+      status: nibssResult.status.toLowerCase(),
     });
+
+    console.log("Recorded transaction:", txn);
 
     res.status(201).json({
       message: "Transfer successful",
@@ -119,7 +148,7 @@ exports.getTransactionStatus = async (req, res, next) => {
       transactionId: local.transactionId,
       status: local.status,
       amount: local.amount,
-      from: local.fromAccount,
+      from: local.from,
       to: local.toAccount,
       type: local.type,
       date: local.createdAt,

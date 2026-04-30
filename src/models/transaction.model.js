@@ -12,11 +12,13 @@ const transactionSchema = new mongoose.Schema(
       type: String,
       enum: ["intra", "inter", "credit"],
     },
-    fromAccount: {
+    from: {
       type: String,
+      required: true,
     },
-    toAccount: {
+    to: {
       type: String,
+      required: true,
     },
     amount: {
       type: Number,

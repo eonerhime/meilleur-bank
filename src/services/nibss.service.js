@@ -1,3 +1,4 @@
+require("dotenv").config();
 const axios = require("axios");
 
 const BASE_URL = process.env.NIBSS_BASE_URL;
@@ -21,15 +22,35 @@ const getNibssToken = async () => {
 
 // Helper: authenticated NIBSS request
 const nibssRequest = async (method, path, data = null) => {
-  const token = await getNibssToken();
-  const config = {
-    method,
-    url: `${BASE_URL}${path}`,
-    headers: { Authorization: `Bearer ${token}` },
-    ...(data && { data }),
-  };
-  const res = await axios(config);
-  return res.data;
+  console.log("-->NIBSS transfer request:", method, path, data);
+
+  try {
+    const token = await getNibssToken();
+    const config = {
+      method,
+      url: `${BASE_URL}${path}`,
+      headers: { Authorization: `Bearer ${token}` },
+      ...(data && { data }),
+    };
+    console.log(
+      "NIBSS request body being sent:",
+      JSON.stringify(data, null, 2),
+    );
+
+    const res = await axios(config);
+    return res.data;
+  } catch (error) {
+    console.error(
+      "NIBSS Error Response:",
+      JSON.stringify(error.response?.data, null, 2),
+    );
+    console.error("NIBSS Error Status:", error.response?.status);
+    console.error(
+      "NIBSS Error Headers:",
+      JSON.stringify(error.response?.headers, null, 2),
+    );
+    throw error;
+  }
 };
 
 // ── Identity ──────────────────────────────────────────
@@ -47,9 +68,21 @@ const getBalance = (accountNo) =>
   nibssRequest("get", `/api/account/balance/${accountNo}`);
 
 // ── Transfers ──────────────────────────────────────────
+<<<<<<< Updated upstream
 const transfer = (payload) => nibssRequest("post", "/api/transfer", payload);
 const getTransaction = (txId) =>
   nibssRequest("get", `/api/transaction/${txId}`);
+=======
+const transfer = ({ from, to, amount }) =>
+  nibssRequest("post", "/api/transfer", {
+    from,
+    to,
+    amount,
+  });
+console.log("=> NIBSS transfer function:", transfer);
+
+const getTransaction = (ref) => nibssRequest("get", `/api/transaction/${ref}`);
+>>>>>>> Stashed changes
 
 module.exports = {
   insertBvn,
